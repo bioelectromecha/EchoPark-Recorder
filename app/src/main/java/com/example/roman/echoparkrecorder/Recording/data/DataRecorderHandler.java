@@ -37,6 +37,7 @@ public class DataRecorderHandler extends HandlerThread implements
 
     public DataRecorderHandler(Context mContext){
         super("DataRecorderThread");
+        LogUtils.d("DataRecorderHandler");
         mJSONdataRecorder = new JSONDataRecorder();
 
         // bind the google api client - for user location
@@ -45,11 +46,11 @@ public class DataRecorderHandler extends HandlerThread implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-
     }
 
     @Override
     public void startRecording(String dataFilePath){
+        LogUtils.d("startRecording "+ System.currentTimeMillis());
         mDataFilePath = dataFilePath;
         //connect the api
         mGoogleApiClient.connect();
@@ -57,6 +58,7 @@ public class DataRecorderHandler extends HandlerThread implements
 
     @Override
     public void stopRecording(){
+        LogUtils.d("stopRecording "+ System.currentTimeMillis());
         // disconnect the api
         mGoogleApiClient.disconnect();
     }
@@ -66,12 +68,11 @@ public class DataRecorderHandler extends HandlerThread implements
     public void onLocationChanged(Location location) {
         mLastLocation=location;
         mJSONdataRecorder.recordLocation(mLastLocation,mDataFilePath);
-        LogUtils.d("written some data just now");
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-
+        LogUtils.d("");
         updateLastLocation();
 
         if (mLastLocation != null) {

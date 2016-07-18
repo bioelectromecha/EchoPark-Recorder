@@ -32,6 +32,7 @@ public class RecordingManager {
     private final String BASE_VIDEO_FILE_NAME = "/video";
 
 
+
     // shared preferences to increment file names
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mSharedPrefEditor;
@@ -42,6 +43,9 @@ public class RecordingManager {
     private VideoRecorderHandler mVideoRecorderHandler;
 
     private Context mContext;
+
+    private boolean mRecordingState = false;
+
 
     public RecordingManager(Context context){
         mContext = context;
@@ -63,10 +67,16 @@ public class RecordingManager {
     }
 
     public void startRecording(){
-        if(!isExternalStorageWritable()){
-            Toast.makeText(mContext, "EXTERNAL STORAGE IS NOT WRITEABLE", Toast.LENGTH_SHORT).show();
+        LogUtils.d("startRecording "+ System.currentTimeMillis());
+        if (mRecordingState) {
             return;
         }
+
+        if(!isExternalStorageWritable()){
+            LogUtils.d("EXTERNAL STORAGE IS NOT WRITEABLE");
+            return;
+        }
+        mRecordingState = true;
 
         //generate the name id suffix and increment the shared prefs
         int fileNameIdSuffix = mSharedPreferences.getInt("fileId",0)+1;
@@ -86,10 +96,15 @@ public class RecordingManager {
         mAudioRecorderHandler.postTask(RecorderMessage.getStartMessage(mAudioRecorderHandler,audioFilePath));
         //start the video recording to .mp4 file
         mVideoRecorderHandler.postTask(RecorderMessage.getStartMessage(mVideoRecorderHandler,videoFilePath));
-
     }
 
     public void stopRecording(){
+        LogUtils.d("stopRecording "+ System.currentTimeMillis());
+        if(!mRecordingState){
+            return;
+        }
+
+        mRecordingState = false;
 
         //stop recording location to json file
         mDataRecorderHandler.postTask(RecorderMessage.getStopMessage(mDataRecorderHandler));
@@ -118,5 +133,9 @@ public class RecordingManager {
             //failed or already exists
         }
         return file.getAbsolutePath();
+    }
+
+    public boolean getRecordingState() {
+        return mRecordingState;
     }
 }

@@ -3,6 +3,7 @@ package com.example.roman.echoparkrecorder.Recording.audio;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.provider.Settings;
 
 import com.apkfuns.logutils.LogUtils;
 import com.example.roman.echoparkrecorder.Recording.Recorder;
@@ -14,11 +15,12 @@ public class AudioRecorderHandler extends HandlerThread implements Recorder {
 
     //audio recorder
     private WavAudioRecorder myAudioRecorder;
-
     private Handler mHandler;
 
+    //TODO: CHECK WHY THE HELL THE RECORDING IS NOT STOPPING AFTER ALL THE OTHER THREADS HAVE STOPPED
     public AudioRecorderHandler(){
-        super("AudioRecorderThread", Process.THREAD_PRIORITY_AUDIO);
+        super("AudioRecorderThread", Process.THREAD_PRIORITY_DISPLAY);
+        LogUtils.d("AudioRecorderHandler");
         //initialize media recorder
         myAudioRecorder= WavAudioRecorder.getInstance();
     }
@@ -30,23 +32,20 @@ public class AudioRecorderHandler extends HandlerThread implements Recorder {
 
     @Override
     public void startRecording(String audioFilePath){
+        LogUtils.d("startRecording "+ System.currentTimeMillis());
         if(myAudioRecorder.getState() == WavAudioRecorder.State.STOPPED){
             myAudioRecorder.reset();
-        }
-        if(myAudioRecorder.getState() == WavAudioRecorder.State.ERROR){
+        }else if(myAudioRecorder.getState() == WavAudioRecorder.State.ERROR){
             myAudioRecorder = WavAudioRecorder.getInstance();
         }
         initializeMediaRecorder(audioFilePath);
-        LogUtils.d("before start" +myAudioRecorder.getState());
         myAudioRecorder.start();
-        LogUtils.d("after start" +myAudioRecorder.getState());
     }
 
     @Override
     public void stopRecording(){
-        LogUtils.d("before stop" +myAudioRecorder.getState());
+        LogUtils.d("stopRecording "+ System.currentTimeMillis());
         myAudioRecorder.stop();
-        LogUtils.d("after stop"+myAudioRecorder.getState());
     }
 
 

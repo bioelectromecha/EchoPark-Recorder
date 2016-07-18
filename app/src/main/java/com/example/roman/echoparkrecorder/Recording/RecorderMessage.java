@@ -1,5 +1,7 @@
 package com.example.roman.echoparkrecorder.Recording;
 
+import com.apkfuns.logutils.LogUtils;
+
 /**
  * Created by roman on 7/7/16.
  */
@@ -27,7 +29,7 @@ public class RecorderMessage implements Runnable {
     public void run() {
         if(mUrl != null){
             mRecorder.startRecording(mUrl);
-        }else{
+        }else {
             mRecorder.stopRecording();
         }
 

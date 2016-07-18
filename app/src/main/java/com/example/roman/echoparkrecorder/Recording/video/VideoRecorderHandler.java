@@ -2,67 +2,82 @@ package com.example.roman.echoparkrecorder.Recording.video;
 
 
 
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
-
+import android.view.Surface;
 import com.apkfuns.logutils.LogUtils;
 import com.example.roman.echoparkrecorder.Recording.Recorder;
 
-import java.io.IOException;
 
 /**
  * Created by roman on 7/7/16.
  */
 public class VideoRecorderHandler extends HandlerThread implements Recorder {
+    private Camera mServiceCamera;
     private MediaRecorder mMediaRecorder;
     private Handler mHandler;
-    private Camera mCamera;
+
 
     public VideoRecorderHandler() {
-        super("VideoRecorderThread", Process.THREAD_PRIORITY_DEFAULT);
+        super("VideoRecorderThread", Process.THREAD_PRIORITY_DISPLAY);
         mMediaRecorder = new MediaRecorder();
-
+        LogUtils.d("VideoRecorderHandler");
     }
 
     @Override
     public void startRecording(String videoFilePath) {
-        initRecorder(videoFilePath);
+        LogUtils.d("startRecording "+ System.currentTimeMillis());
+
         try {
+            mServiceCamera = Camera.open();
+//            Camera.Parameters params = mServiceCamera.getParameters();
+//            mServiceCamera.setParameters(params);
+            mServiceCamera.unlock();
+            //initialize all the mediarecorder stuff
+            initMediaRecorder(videoFilePath);
             mMediaRecorder.prepare();
-        } catch (IOException e) {
-            mMediaRecorder.release();
-            LogUtils.d("MediaRecorder prepare() failed");
+            mMediaRecorder.start();
+        } catch (Exception e) {
+            LogUtils.d(e.getMessage());
             e.printStackTrace();
         }
-        mMediaRecorder.start();
-
     }
 
     @Override
     public void stopRecording() {
+        LogUtils.d("stopRecording "+ System.currentTimeMillis());
+
         mMediaRecorder.stop();
         mMediaRecorder.reset();
 
+        mServiceCamera.unlock();
+                try {
+            mServiceCamera.reconnect();
+        } catch (Exception e) {
+            LogUtils.d(e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    private void initRecorder(String videoFilePath ) {
-
-        //get camera and unlock
-        mCamera = Camera.open();
-        mCamera.unlock();
-        //give camera to mediaRecorder
-        mMediaRecorder.setCamera(mCamera);
-        //
+    private void initMediaRecorder(String videoFilePath ) {
+        LogUtils.d("");
+        mMediaRecorder.setCamera(mServiceCamera);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-        CamcorderProfile profile = CamcorderProfile
-                .get(CamcorderProfile.QUALITY_HIGH);
-        mMediaRecorder.setProfile(profile);
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        mMediaRecorder.setOutputFormat(profile.fileFormat);
+        mMediaRecorder.setVideoFrameRate(60);
+        mMediaRecorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+        mMediaRecorder.setVideoEncodingBitRate(profile.videoBitRate);
+        mMediaRecorder.setVideoEncoder(profile.videoCodec);
         mMediaRecorder.setOutputFile(videoFilePath);
+        //create and pass a fake surfaceview to mediaRecorder
+        Surface surface = new Surface(new SurfaceTexture(10));
+        mMediaRecorder.setPreviewDisplay(surface);
     }
 
     @Override
@@ -73,5 +88,4 @@ public class VideoRecorderHandler extends HandlerThread implements Recorder {
     public void postTask(Runnable task){
         mHandler.post(task);
     }
-
 }

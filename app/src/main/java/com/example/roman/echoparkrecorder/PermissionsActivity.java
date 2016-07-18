@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
-
 import com.apkfuns.logutils.LogUtils;
 
 public class PermissionsActivity extends AppCompatActivity {

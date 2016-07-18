@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.apkfuns.logutils.LogUtils;
 import com.example.roman.echoparkrecorder.MainActivity;
 import com.example.roman.echoparkrecorder.R;
 import com.example.roman.echoparkrecorder.Recording.RecordingManager;
@@ -14,11 +15,12 @@ public class RecordingService extends Service implements RecordingStateListener{
 
     private ServiceBroadcastReceiver mBroadcastReceiver;
     private ServiceBroadcastTransmitter mServiceTransmitter;
-    private static final int NOTIFICATION_ID = 1;
+    private static final int NOTIFICATION_ID = 1337;
     private RecordingManager mRecordingManager;
 
     @Override
     public void onCreate() {
+        LogUtils.d("");
         super.onCreate();
         mBroadcastReceiver = new ServiceBroadcastReceiver(this);
         registerReceiver(mBroadcastReceiver, mBroadcastReceiver.getIntentFilter());
@@ -29,12 +31,14 @@ public class RecordingService extends Service implements RecordingStateListener{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        LogUtils.d("");
         showForegroundNotification("READY");
-        return super.onStartCommand(intent, flags, startId);
+        return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        LogUtils.d("");
         mRecordingManager.stopRecording();
         unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
@@ -48,18 +52,21 @@ public class RecordingService extends Service implements RecordingStateListener{
 
     @Override
     public void requestStartRecording() {
+        LogUtils.d("");
         showForegroundNotification("RECORDING");
         mRecordingManager.startRecording();
     }
 
     @Override
     public void requestStopRecording() {
+        LogUtils.d("");
         mRecordingManager.stopRecording();
         showForegroundNotification("READY");
     }
 
     @Override
     public void requestUpdate() {
+        LogUtils.d("");
         if(mRecordingManager.getRecordingState()){
             mServiceTransmitter.sendRecordingStatusOn();
         }else {

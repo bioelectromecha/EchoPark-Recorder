@@ -48,20 +48,17 @@ public class ActivityBroadcastTransmitter {
         Intent intent = new Intent();
         intent.setAction(ACTION_STRING_START_RECORDING);
         mContext.sendBroadcast(intent);
-        LogUtils.d("startRecording");
     }
 
     public void stopRecording() {
         Intent intent = new Intent();
         intent.setAction(ACTION_STRING_STOP_RECORDING);
         mContext.sendBroadcast(intent);
-        LogUtils.d("stopRecording");
     }
 
     public void requestStatusUpdate() {
         Intent intent = new Intent();
         intent.setAction(ACTION_STRING_REQUEST_UPDATE);
         mContext.sendBroadcast(intent);
-        LogUtils.d("requestStatusUpdate");
     }
 }
