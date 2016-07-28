@@ -1,9 +1,11 @@
-package com.example.roman.echoparkrecorder.service;
+package com.example.roman.echoparkrecorder.service.intentcomms;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+
+import com.example.roman.echoparkrecorder.service.listeners.ServiceStateListener;
 
 /**
  * Created by roman on 7/16/16.

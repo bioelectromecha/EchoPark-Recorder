@@ -1,4 +1,4 @@
-package com.example.roman.echoparkrecorder.Recording.data;
+package com.example.roman.echoparkrecorder.recording.data;
 
 import android.content.Context;
 import android.location.Location;
@@ -7,12 +7,23 @@ import android.os.Handler;
 import android.os.HandlerThread;
 
 import com.apkfuns.logutils.LogUtils;
-import com.example.roman.echoparkrecorder.Recording.Recorder;
+import com.example.roman.echoparkrecorder.recording.Recorder;
+import com.example.roman.echoparkrecorder.recording.data.model.DataSet;
+import com.example.roman.echoparkrecorder.sync.TimeKeeper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Created by roman on 6/13/16.
@@ -32,6 +43,7 @@ public class DataRecorderHandler extends HandlerThread implements
     private JSONDataRecorder mJSONdataRecorder;
 
     private String mDataFilePath="";
+    private static final String METADATA_SUFFIX = ".metadata";
 
     private Handler mHandler;
 
@@ -49,14 +61,48 @@ public class DataRecorderHandler extends HandlerThread implements
     }
 
     @Override
+    @DebugLog
     public void startRecording(String dataFilePath){
-        LogUtils.d("startRecording "+ System.currentTimeMillis());
+        stampCmdMetadata(dataFilePath);
         mDataFilePath = dataFilePath;
         //connect the api
         mGoogleApiClient.connect();
+        stampInitMetadata(dataFilePath);
+    }
+
+    private void stampCmdMetadata(String dataFilePath) {
+        // the file we're going to write to
+        dataFilePath.concat(METADATA_SUFFIX);
+        File file = new File(dataFilePath);
+        //write json to file
+        try {
+            String timeStamp = "cmdTime:" + String.valueOf(TimeKeeper.getInstance().getTime()) + "\r\n";
+            FileOutputStream outputStream = new FileOutputStream(file);
+            outputStream.write(timeStamp.getBytes());
+            outputStream.close();
+        } catch (IOException e) {
+            LogUtils.d("stampCmdMetadata failed");
+            e.printStackTrace();
+        }
+    }
+    private void stampInitMetadata(String dataFilePath) {
+        // the file we're going to write to
+        dataFilePath.concat(METADATA_SUFFIX);
+        File file = new File(dataFilePath);
+        //write json to file
+        try {
+            String timeStamp = "initTime:" + String.valueOf(TimeKeeper.getInstance().getTime()) + "\r\n";
+            FileOutputStream outputStream = new FileOutputStream(file);
+            outputStream.write(timeStamp.getBytes());
+            outputStream.close();
+        } catch (IOException e) {
+            LogUtils.d("stampInitMetadata failed");
+            e.printStackTrace();
+        }
     }
 
     @Override
+    @DebugLog
     public void stopRecording(){
         LogUtils.d("stopRecording "+ System.currentTimeMillis());
         // disconnect the api
@@ -86,6 +132,8 @@ public class DataRecorderHandler extends HandlerThread implements
         try {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         } catch (SecurityException e) {
+            LogUtils.d(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -105,6 +153,8 @@ public class DataRecorderHandler extends HandlerThread implements
             //if fine location permission not granted
         } catch (SecurityException e) {
             LogUtils.d("LOCATION PERMISSION NOT GRANTED");
+            LogUtils.d(e.getMessage());
+            e.printStackTrace();
         }
     }
 

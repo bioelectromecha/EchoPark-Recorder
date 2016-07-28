@@ -1,4 +1,4 @@
-package com.example.roman.echoparkrecorder.service;
+package com.example.roman.echoparkrecorder.service.intentcomms;
 
 import android.content.Context;
 import android.content.Intent;

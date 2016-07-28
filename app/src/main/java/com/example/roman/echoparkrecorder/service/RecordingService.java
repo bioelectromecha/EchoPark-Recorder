@@ -3,20 +3,29 @@ package com.example.roman.echoparkrecorder.service;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
 
 import com.apkfuns.logutils.LogUtils;
 import com.example.roman.echoparkrecorder.MainActivity;
 import com.example.roman.echoparkrecorder.R;
-import com.example.roman.echoparkrecorder.Recording.RecordingManager;
+import com.example.roman.echoparkrecorder.recording.RecordingManager;
+import com.example.roman.echoparkrecorder.service.intentcomms.ServiceBroadcastReceiver;
+import com.example.roman.echoparkrecorder.service.intentcomms.ServiceBroadcastTransmitter;
+import com.example.roman.echoparkrecorder.service.listeners.RecordingStateListener;
+import com.example.roman.echoparkrecorder.sync.networking.NetworkManager;
 
-public class RecordingService extends Service implements RecordingStateListener{
+import java.lang.reflect.Method;
+
+public class RecordingService extends Service implements RecordingStateListener {
 
     private ServiceBroadcastReceiver mBroadcastReceiver;
     private ServiceBroadcastTransmitter mServiceTransmitter;
     private static final int NOTIFICATION_ID = 1337;
     private RecordingManager mRecordingManager;
+    private NetworkManager mNetworkManager;
 
     @Override
     public void onCreate() {
@@ -26,7 +35,9 @@ public class RecordingService extends Service implements RecordingStateListener{
         registerReceiver(mBroadcastReceiver, mBroadcastReceiver.getIntentFilter());
         mRecordingManager = new RecordingManager(this);
         mServiceTransmitter = new ServiceBroadcastTransmitter(this);
-
+        LogUtils.d("isWifiHotspotEnabled: " + isWifiHotspotEnabled());
+        mNetworkManager = new NetworkManager(isWifiHotspotEnabled(),this);
+        mNetworkManager.start();
     }
 
     @Override
@@ -41,6 +52,7 @@ public class RecordingService extends Service implements RecordingStateListener{
         LogUtils.d("");
         mRecordingManager.stopRecording();
         unregisterReceiver(mBroadcastReceiver);
+        mNetworkManager.stop();
         super.onDestroy();
     }
 
@@ -51,22 +63,34 @@ public class RecordingService extends Service implements RecordingStateListener{
     }
 
     @Override
+    public void requestNetworkStartRecording() {
+        LogUtils.d("requestNetworkStartRecording");
+        mNetworkManager.sendNetworkStartRecording();
+    }
+
+    @Override
+    public void requestNetworkStopRecording() {
+        LogUtils.d("requestNetworkStopRecording");
+        mNetworkManager.sendNetworkStopRecording();
+    }
+
+    @Override
     public void requestStartRecording() {
-        LogUtils.d("");
+        LogUtils.d("requestStartRecording");
         showForegroundNotification("RECORDING");
         mRecordingManager.startRecording();
     }
 
     @Override
     public void requestStopRecording() {
-        LogUtils.d("");
+        LogUtils.d("requestStopRecording");
         mRecordingManager.stopRecording();
         showForegroundNotification("READY");
     }
 
     @Override
     public void requestUpdate() {
-        LogUtils.d("");
+        LogUtils.d("requestUpdate");
         if(mRecordingManager.getRecordingState()){
             mServiceTransmitter.sendRecordingStatusOn();
         }else {
@@ -98,5 +122,17 @@ public class RecordingService extends Service implements RecordingStateListener{
         startForeground(NOTIFICATION_ID, notification);
     }
 
-
+    private boolean isWifiHotspotEnabled(){
+        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        final Method method;
+        try {
+            method = wifiManager.getClass().getDeclaredMethod("isWifiApEnabled");
+            method.setAccessible(true); //in the case of visibility change in future APIs
+            return (Boolean) method.invoke(wifiManager);
+        } catch (Exception e) {
+            LogUtils.d(e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

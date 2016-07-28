@@ -1,5 +1,5 @@
 
-package com.example.roman.echoparkrecorder.Recording.data.model;
+package com.example.roman.echoparkrecorder.recording.data.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

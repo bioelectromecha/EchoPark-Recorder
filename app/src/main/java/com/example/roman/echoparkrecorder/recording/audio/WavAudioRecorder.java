@@ -1,4 +1,4 @@
-package com.example.roman.echoparkrecorder.Recording.audio;
+package com.example.roman.echoparkrecorder.recording.audio;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;

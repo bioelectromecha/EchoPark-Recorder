@@ -1,10 +1,10 @@
-package com.example.roman.echoparkrecorder.service;
+package com.example.roman.echoparkrecorder.service.intentcomms;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 
-import com.apkfuns.logutils.LogUtils;
+import com.example.roman.echoparkrecorder.service.RecordingService;
 
 /**
  * Created by roman on 7/16/16.

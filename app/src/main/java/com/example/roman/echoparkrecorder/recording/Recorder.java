@@ -1,4 +1,4 @@
-package com.example.roman.echoparkrecorder.Recording;
+package com.example.roman.echoparkrecorder.recording;
 
 /**
  * Created by roman on 7/7/16.

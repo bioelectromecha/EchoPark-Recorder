@@ -1,5 +1,5 @@
 
-package com.example.roman.echoparkrecorder.Recording.data.model;
+package com.example.roman.echoparkrecorder.recording.data.model;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,9 +1,11 @@
-package com.example.roman.echoparkrecorder.service;
+package com.example.roman.echoparkrecorder.service.intentcomms;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+
+import com.example.roman.echoparkrecorder.service.listeners.RecordingStateListener;
 
 /**
  * Created by roman on 7/16/16.
@@ -28,11 +30,11 @@ public class ServiceBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if(intent.getAction().equals(ACTION_STRING_START_RECORDING)){
-            mListener.requestStartRecording();
+            mListener.requestNetworkStartRecording();
             return;
         }
         if(intent.getAction().equals(ACTION_STRING_STOP_RECORDING)) {
-            mListener.requestStopRecording();
+            mListener.requestNetworkStopRecording();
             return;
         }
         if (intent.getAction().equals(ACTION_STRING_REQUEST_UPDATE)) {

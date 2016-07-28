@@ -1,15 +1,14 @@
-package com.example.roman.echoparkrecorder.Recording;
+package com.example.roman.echoparkrecorder.recording;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
 
 import com.apkfuns.logutils.LogUtils;
-import com.example.roman.echoparkrecorder.Recording.audio.AudioRecorderHandler;
-import com.example.roman.echoparkrecorder.Recording.data.DataRecorderHandler;
-import com.example.roman.echoparkrecorder.Recording.video.VideoRecorderHandler;
+import com.example.roman.echoparkrecorder.recording.audio.AudioRecorderHandler;
+import com.example.roman.echoparkrecorder.recording.data.DataRecorderHandler;
+import com.example.roman.echoparkrecorder.recording.video.VideoRecorderHandler;
 
 import java.io.File;
 

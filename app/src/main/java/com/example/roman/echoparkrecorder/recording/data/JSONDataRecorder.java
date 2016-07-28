@@ -1,8 +1,8 @@
-package com.example.roman.echoparkrecorder.Recording.data;
+package com.example.roman.echoparkrecorder.recording.data;
 
 import com.apkfuns.logutils.LogUtils;
-import com.example.roman.echoparkrecorder.Recording.data.model.DataSet;
-import com.example.roman.echoparkrecorder.Recording.data.model.Location;
+import com.example.roman.echoparkrecorder.recording.data.model.DataSet;
+import com.example.roman.echoparkrecorder.recording.data.model.Location;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -35,6 +35,7 @@ public class JSONDataRecorder {
 
     public void recordLocation(android.location.Location androidLocation, String dataFilePath){
 
+        //TODO: location is written with network time and not TimeKeeper time
         // the file we're going to write to
         File file = new File(dataFilePath);
 
