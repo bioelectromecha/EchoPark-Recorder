@@ -6,11 +6,7 @@ import android.os.Process;
 
 import com.apkfuns.logutils.LogUtils;
 import com.example.roman.echoparkrecorder.recording.Recorder;
-import com.example.roman.echoparkrecorder.sync.TimeKeeper;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import com.example.roman.echoparkrecorder.sync.TimeStamper;
 
 import hugo.weaving.DebugLog;
 
@@ -23,8 +19,8 @@ public class AudioRecorderHandler extends HandlerThread implements Recorder {
     private WavAudioRecorder myAudioRecorder;
     private Handler mHandler;
 
-
-    private static final String METADATA_SUFFIX = ".metadata";
+    private TimeStamper mTimeStamper;
+    private String mCurrentFilePath = "";
 
     //TODO: CHECK WHY THE HELL THE RECORDING IS NOT STOPPING AFTER ALL THE OTHER THREADS HAVE STOPPED
     public AudioRecorderHandler(){
@@ -32,6 +28,8 @@ public class AudioRecorderHandler extends HandlerThread implements Recorder {
         LogUtils.d("AudioRecorderHandler");
         //initialize media recorder
         myAudioRecorder= WavAudioRecorder.getInstance();
+        mTimeStamper = new TimeStamper();
+
     }
     private  void initializeMediaRecorder(String audioFilePath){
         //append the filename to the internal storage path - this is where the output will go
@@ -42,53 +40,24 @@ public class AudioRecorderHandler extends HandlerThread implements Recorder {
     @Override
     @DebugLog
     public void startRecording(String audioFilePath){
-        stampCmdMetadata(audioFilePath);
-        if(myAudioRecorder.getState() == WavAudioRecorder.State.STOPPED){
-            myAudioRecorder.reset();
-        }else if(myAudioRecorder.getState() == WavAudioRecorder.State.ERROR){
-            myAudioRecorder = WavAudioRecorder.getInstance();
-        }
+        LogUtils.d("startRecording");
+        mCurrentFilePath = audioFilePath;
+        mTimeStamper.stampCmdMetadata(TimeStamper.StampRecorderType.AUDIO);
+
+        myAudioRecorder = WavAudioRecorder.getInstance();
         initializeMediaRecorder(audioFilePath);
         myAudioRecorder.start();
-        stampInitMetadata(audioFilePath);
-    }
 
-    private void stampCmdMetadata(String dataFilePath) {
-        // the file we're going to write to
-        dataFilePath.concat(METADATA_SUFFIX);
-        File file = new File(dataFilePath);
-        //write json to file
-        try {
-            String timeStamp = "cmdTime:" + String.valueOf(TimeKeeper.getInstance().getTime()) + "\r\n";
-            FileOutputStream outputStream = new FileOutputStream(file);
-            outputStream.write(timeStamp.getBytes());
-            outputStream.close();
-        } catch (IOException e) {
-            LogUtils.d("stampCmdMetadata failed");
-            e.printStackTrace();
-        }
-    }
-    private void stampInitMetadata(String dataFilePath) {
-        // the file we're going to write to
-        dataFilePath.concat(METADATA_SUFFIX);
-        File file = new File(dataFilePath);
-        //write json to file
-        try {
-            String timeStamp = "initTime:" + String.valueOf(TimeKeeper.getInstance().getTime()) + "\r\n";
-            FileOutputStream outputStream = new FileOutputStream(file);
-            outputStream.write(timeStamp.getBytes());
-            outputStream.close();
-        } catch (IOException e) {
-            LogUtils.d("stampInitMetadata failed");
-            e.printStackTrace();
-        }
+        mTimeStamper.stampInitMetadata(TimeStamper.StampRecorderType.AUDIO);
     }
 
     @Override
     @DebugLog
     public void stopRecording(){
-        LogUtils.d("stopRecording "+ System.currentTimeMillis());
+        LogUtils.d("stopRecording");
+        mTimeStamper.stampStopMetadata(TimeStamper.StampRecorderType.AUDIO);
         myAudioRecorder.stop();
+        myAudioRecorder.release();
     }
 
 

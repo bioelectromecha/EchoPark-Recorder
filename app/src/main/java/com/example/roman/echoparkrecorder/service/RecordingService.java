@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import com.apkfuns.logutils.LogUtils;
 import com.example.roman.echoparkrecorder.MainActivity;
@@ -77,15 +78,20 @@ public class RecordingService extends Service implements RecordingStateListener 
     @Override
     public void requestStartRecording() {
         LogUtils.d("requestStartRecording");
+        Toast.makeText(RecordingService.this, R.string.recording_started, Toast.LENGTH_SHORT).show();
         showForegroundNotification("RECORDING");
         mRecordingManager.startRecording();
+        //this is to change the start/stop button in activty
+        requestUpdate();
     }
 
     @Override
     public void requestStopRecording() {
-        LogUtils.d("requestStopRecording");
+        Toast.makeText(RecordingService.this, R.string.recording_stopped, Toast.LENGTH_SHORT).show();
         mRecordingManager.stopRecording();
         showForegroundNotification("READY");
+        //this is to change the start/stop button in activty
+        requestUpdate();
     }
 
     @Override

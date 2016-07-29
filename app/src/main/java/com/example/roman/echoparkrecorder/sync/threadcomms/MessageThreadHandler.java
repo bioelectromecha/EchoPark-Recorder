@@ -24,10 +24,12 @@ public class MessageThreadHandler extends Handler {
     public void handleMessage(Message msg) {
         LogUtils.d("handleMessage");
         if(msg.what == START_MSG){
+            LogUtils.d("START_MSG");
             mNetworkMessenger.sendStartMessage();
             return;
         }
         if (msg.what == STOP_MSG) {
+            LogUtils.d("STOP_MSG");
             mNetworkMessenger.sendStopMessage();
         }
     }

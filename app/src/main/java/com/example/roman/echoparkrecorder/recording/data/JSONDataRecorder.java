@@ -1,32 +1,25 @@
 package com.example.roman.echoparkrecorder.recording.data;
 
 import com.apkfuns.logutils.LogUtils;
-import com.example.roman.echoparkrecorder.recording.data.model.DataSet;
 import com.example.roman.echoparkrecorder.recording.data.model.Location;
+import com.example.roman.echoparkrecorder.sync.TimeKeeper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 /**
  * Created by roman on 6/12/16.
  */
 public class JSONDataRecorder {
     // file naming stuff
-    private DataSet mDataSet;
-
     GsonBuilder mBuilder;
     Gson mGson;
+    private boolean firstWrite = true;
 
     public JSONDataRecorder(){
-
-        //generate a data model
-        mDataSet = new DataSet();
 
         //instantiate GSON
         mBuilder = new GsonBuilder();
@@ -34,47 +27,54 @@ public class JSONDataRecorder {
     }
 
     public void recordLocation(android.location.Location androidLocation, String dataFilePath){
-
-        //TODO: location is written with network time and not TimeKeeper time
+        //TODO : location time must be written with timekeepr
         // the file we're going to write to
         File file = new File(dataFilePath);
 
-        if(file.exists()) {
-            try {
-                FileInputStream fIn = new FileInputStream(file);
-                BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-                String aDataRow = "";
-                String aBuffer = ""; //Holds the text
-                while ((aDataRow = myReader.readLine()) != null) {
-                    aBuffer += aDataRow;
-                }
-                myReader.close();
-                mDataSet = (mGson.fromJson(aBuffer, DataSet.class));
-            } catch (IOException e) {
-                LogUtils.d("READ FROM FILE FAILED");
-                e.printStackTrace();
-            }
-        }
-
-        //create the location POJO
-        Location location = new Location();
-        location.setLatitude(String.valueOf(androidLocation.getLatitude()));
-        location.setLongtitude(String.valueOf(androidLocation.getLongitude()));
-        location.setSpeed(String.valueOf(androidLocation.getSpeed()));
-        location.setTimeStamp(String.valueOf(androidLocation.getTime()));
-        //add to pojo tree
-        mDataSet.addLocationEvent(location);
-
+        //create the location POJO TODO
+        Location location = new Location(androidLocation, TimeKeeper.getInstance().getTime());
 
         //write json to file
         try {
-            String s = mGson.toJson(mDataSet);
-            FileOutputStream outputStream =  new FileOutputStream(file);
+            String s = mGson.toJson(location);
+            FileOutputStream outputStream =  new FileOutputStream(file,true);
+            if(!firstWrite){
+                String seperator = ",";
+                outputStream.write(seperator.getBytes());
+            }
             outputStream.write(s.getBytes());
+            firstWrite = false;
             outputStream.close();
         }catch (IOException e){
             LogUtils.d(" WRITE TO JSON FAILED");
             e.printStackTrace();
         }
     }
+
+    public void signStart(String dataFilePath) {
+        File file = new File(dataFilePath);
+        try {
+            String s = "[";
+            FileOutputStream outputStream =  new FileOutputStream(file,true);
+            outputStream.write(s.getBytes());
+            outputStream.close();
+        }catch (IOException e){
+            LogUtils.d("signStart failed");
+            e.printStackTrace();
+        }
+    }
+
+    public void signStop(String dataFilePath) {
+        File file = new File(dataFilePath);
+        try {
+            String s = "]";
+            FileOutputStream outputStream =  new FileOutputStream(file,true);
+            outputStream.write(s.getBytes());
+            outputStream.close();
+        }catch (IOException e){
+            LogUtils.d("signStart failed");
+            e.printStackTrace();
+        }
+    }
+
 }

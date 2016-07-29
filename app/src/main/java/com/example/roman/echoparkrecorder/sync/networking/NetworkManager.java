@@ -36,7 +36,7 @@ public class NetworkManager implements NetworkMessenger {
         }else{
             MessageThreadHandler handler = new MessageThreadHandler(mSyncClient.getLooper(), mSyncClient);
             Message message = new Message();
-            message.what = MessageThreadHandler.STOP_MSG;
+            message.what = MessageThreadHandler.START_MSG;
             handler.sendMessage(message);
         }
     }

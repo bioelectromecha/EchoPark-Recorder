@@ -26,13 +26,13 @@ public class ClientListener extends Listener {
         LogUtils.d("received");
         if (object instanceof NetworkProtocol.CommandMessage) {
             NetworkProtocol.CommandMessage commandMessage = (NetworkProtocol.CommandMessage) object;
-            if (commandMessage.getCommand() == NetworkProtocol.START_COMMAND) {
+            if (commandMessage.command == NetworkProtocol.START_COMMAND) {
                 LogUtils.d("received START_COMMAND");
                 mSyncClient.setStartTimeOffset(commandMessage);
                 mSyncClient.sendStartRecordingMessage();
                 return;
             }
-            if (commandMessage.getCommand() == NetworkProtocol.STOP_COMMAND) {
+            if (commandMessage.command == NetworkProtocol.STOP_COMMAND) {
                 LogUtils.d("received STOP_COMMAND");
                 mSyncClient.sendStopRecordingMessage();
                 return;

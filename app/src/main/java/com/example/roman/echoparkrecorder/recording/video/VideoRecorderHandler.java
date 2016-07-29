@@ -12,11 +12,7 @@ import android.os.Process;
 import android.view.Surface;
 import com.apkfuns.logutils.LogUtils;
 import com.example.roman.echoparkrecorder.recording.Recorder;
-import com.example.roman.echoparkrecorder.sync.TimeKeeper;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import com.example.roman.echoparkrecorder.sync.TimeStamper;
 
 import hugo.weaving.DebugLog;
 
@@ -28,20 +24,22 @@ public class VideoRecorderHandler extends HandlerThread implements Recorder {
     private Camera mServiceCamera;
     private MediaRecorder mMediaRecorder;
     private Handler mHandler;
-
-    private static final String METADATA_SUFFIX = ".metadata";
-
+    private TimeStamper mTimeStamper;
+    private String mCurrentFilePath = "";
 
     public VideoRecorderHandler() {
         super("VideoRecorderThread", Process.THREAD_PRIORITY_DISPLAY);
-        mMediaRecorder = new MediaRecorder();
+        mMediaRecorder = null;
+        mTimeStamper = new TimeStamper();
         LogUtils.d("VideoRecorderHandler");
     }
 
     @Override
     @DebugLog
     public void startRecording(String videoFilePath) {
-        stampCmdMetadata(videoFilePath);
+        LogUtils.d("startRecording");
+        mCurrentFilePath = videoFilePath;
+        mTimeStamper.stampCmdMetadata(TimeStamper.StampRecorderType.VIDEO);
         try {
             mServiceCamera = Camera.open();
 //            Camera.Parameters params = mServiceCamera.getParameters();
@@ -55,58 +53,23 @@ public class VideoRecorderHandler extends HandlerThread implements Recorder {
             LogUtils.d(e.getMessage());
             e.printStackTrace();
         }
-        stampInitMetadata(videoFilePath);
+        mTimeStamper.stampInitMetadata(TimeStamper.StampRecorderType.VIDEO);
     }
-    private void stampCmdMetadata(String dataFilePath) {
-        // the file we're going to write to
-        dataFilePath.concat(METADATA_SUFFIX);
-        File file = new File(dataFilePath);
-        //write json to file
-        try {
-            String timeStamp = "cmdTime:" + String.valueOf(TimeKeeper.getInstance().getTime()) + "\r\n";
-            FileOutputStream outputStream = new FileOutputStream(file);
-            outputStream.write(timeStamp.getBytes());
-            outputStream.close();
-        } catch (IOException e) {
-            LogUtils.d("stampCmdMetadata failed");
-            e.printStackTrace();
-        }
-    }
-    private void stampInitMetadata(String dataFilePath) {
-        // the file we're going to write to
-        dataFilePath.concat(METADATA_SUFFIX);
-        File file = new File(dataFilePath);
-        //write json to file
-        try {
-            String timeStamp = "initTime:" + String.valueOf(TimeKeeper.getInstance().getTime()) + "\r\n";
-            FileOutputStream outputStream = new FileOutputStream(file);
-            outputStream.write(timeStamp.getBytes());
-            outputStream.close();
-        } catch (IOException e) {
-            LogUtils.d("stampInitMetadata failed");
-            e.printStackTrace();
-        }
-    }
-
 
     @Override
     @DebugLog
     public void stopRecording() {
-        LogUtils.d("stopRecording "+ System.currentTimeMillis());
-
+        LogUtils.d("stopRecording");
+        mTimeStamper.stampStopMetadata(TimeStamper.StampRecorderType.VIDEO);
         mMediaRecorder.stop();
-        mMediaRecorder.reset();
-
-        mServiceCamera.unlock();
-                try {
-            mServiceCamera.reconnect();
-        } catch (Exception e) {
-            LogUtils.d(e.getMessage());
-            e.printStackTrace();
-        }
+        mMediaRecorder.release();
+        mServiceCamera.stopPreview();
+        mServiceCamera.setPreviewCallback(null);
+        mServiceCamera.release();
     }
 
     private void initMediaRecorder(String videoFilePath ) {
+        mMediaRecorder = new MediaRecorder();
         mMediaRecorder.setCamera(mServiceCamera);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);

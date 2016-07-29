@@ -4,7 +4,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
 
 public class NetworkProtocol {
-	public static final int PORT_NUMBER = 54555;
+	public static final int PORT_NUMBER = 8080;
 	public static final String HOTSPOT_IP = "192.168.43.1";
 	public static final int TIMEOUT_TIME = 5000;
 
@@ -18,21 +18,7 @@ public class NetworkProtocol {
 	}
 
     static public class CommandMessage {
-        private int mCommand;
-		private long mServerTime;
-
-		public CommandMessage(int command, long serverTime) {
-			mCommand = command;
-			mServerTime = serverTime;
-		}
-
-		public int getCommand() {
-            return mCommand;
-        }
-
-		public long getServerTime() {
-			return mServerTime;
-		}
+        public int command;
+		public long serverTime;
 	}
-
 }

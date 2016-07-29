@@ -9,22 +9,44 @@ public class Location {
     @SerializedName("timeStamp")
     @Expose
     private String timeStamp;
-    @SerializedName("speed")
+    @SerializedName("velocity")
     @Expose
-    private String speed;
+    private String velocity;
     @SerializedName("latitude")
     @Expose
     private String latitude;
     @SerializedName("longtitude")
     @Expose
     private String longtitude;
+    @SerializedName("altitude")
+    @Expose
+    private String altitude;
+    @SerializedName("eladTimeStamp")
+    @Expose
+    private String eladTimeStamp;
+    @SerializedName("accuracy")
+    @Expose
+    private String accuracy;
+    @SerializedName("bearing")
+    @Expose
+    private String bearing;
 
-    /**
+    public Location(android.location.Location androidLocation, long eladTimeStamp){
+        this.timeStamp =  String.valueOf(androidLocation.getTime());
+        this.velocity =  String.valueOf(androidLocation.getSpeed());
+        this.latitude =  String.valueOf(androidLocation.getLatitude());
+        this.longtitude = String.valueOf(androidLocation.getLongitude());
+        this.altitude = String.valueOf(androidLocation.getAltitude());
+        this.eladTimeStamp = String.valueOf(eladTimeStamp);
+        this.accuracy = String.valueOf(androidLocation.getAccuracy());
+        this.bearing = String.valueOf(androidLocation.getBearing());
+    }
+                    /**
      * 
      * @return
      *     The timeStamp
      */
-    public String getTimeStamp() {
+                    public String getTimeStamp() {
         return timeStamp;
     }
 
@@ -40,19 +62,19 @@ public class Location {
     /**
      * 
      * @return
-     *     The speed
+     *     The velocity
      */
-    public String getSpeed() {
-        return speed;
+    public String getVelocity() {
+        return velocity;
     }
 
     /**
      * 
-     * @param speed
-     *     The speed
+     * @param velocity
+     *     The velocity
      */
-    public void setSpeed(String speed) {
-        this.speed = speed;
+    public void setVelocity(String velocity) {
+        this.velocity = velocity;
     }
 
     /**
@@ -91,4 +113,35 @@ public class Location {
         this.longtitude = longtitude;
     }
 
+    public String getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(String altitude) {
+        this.altitude = altitude;
+    }
+
+    public String getEladTimeStamp() {
+        return eladTimeStamp;
+    }
+
+    public void setEladTimeStamp(String eladTimeStamp) {
+        this.eladTimeStamp = eladTimeStamp;
+    }
+
+    public String getAccuracy() {
+        return accuracy;
+    }
+
+    public void setAccuracy(String accuracy) {
+        this.accuracy = accuracy;
+    }
+
+    public String getBearing() {
+        return bearing;
+    }
+
+    public void setBearing(String bearing) {
+        this.bearing = bearing;
+    }
 }

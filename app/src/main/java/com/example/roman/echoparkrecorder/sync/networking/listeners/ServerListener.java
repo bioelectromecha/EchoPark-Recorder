@@ -24,19 +24,22 @@ public class ServerListener extends Listener {
     public void received(Connection connection, Object object) {
         LogUtils.d("received");
         if (object instanceof NetworkProtocol.CommandMessage) {
+            LogUtils.d("object instanceof NetworkProtocol.CommandMessage");
             NetworkProtocol.CommandMessage commandMessage = (NetworkProtocol.CommandMessage) object;
-            if (commandMessage.getCommand() == NetworkProtocol.START_COMMAND) {
+            if (commandMessage.command == NetworkProtocol.START_COMMAND) {
                 LogUtils.d("received START_COMMAND");
                 mSyncServer.sendStartMessage();
                 mSyncServer.sendStartRecordingMessage();
                 return;
             }
-            if (commandMessage.getCommand() == NetworkProtocol.STOP_COMMAND) {
-                LogUtils.d("received STOP_COMMAND");
+            if (commandMessage.command == NetworkProtocol.STOP_COMMAND) {
+                LogUtils.d("received1 STOP_COMMAND");
                 mSyncServer.sendStopMessage();
                 mSyncServer.sendStopRecordingMessage();
                 return;
             }
+        }else{
+            LogUtils.d("received is not instance of anything we know");
         }
     }
     @Override

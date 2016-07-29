@@ -8,20 +8,13 @@ import android.os.HandlerThread;
 
 import com.apkfuns.logutils.LogUtils;
 import com.example.roman.echoparkrecorder.recording.Recorder;
-import com.example.roman.echoparkrecorder.recording.data.model.DataSet;
-import com.example.roman.echoparkrecorder.sync.TimeKeeper;
+import com.example.roman.echoparkrecorder.sync.TimeStamper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 import hugo.weaving.DebugLog;
 
@@ -43,7 +36,9 @@ public class DataRecorderHandler extends HandlerThread implements
     private JSONDataRecorder mJSONdataRecorder;
 
     private String mDataFilePath="";
-    private static final String METADATA_SUFFIX = ".metadata";
+    private TimeStamper mTimeStamper;
+    private String mCurrentFilePath = "";
+
 
     private Handler mHandler;
 
@@ -51,6 +46,7 @@ public class DataRecorderHandler extends HandlerThread implements
         super("DataRecorderThread");
         LogUtils.d("DataRecorderHandler");
         mJSONdataRecorder = new JSONDataRecorder();
+        mTimeStamper = new TimeStamper();
 
         // bind the google api client - for user location
         mGoogleApiClient = new GoogleApiClient.Builder(mContext)
@@ -63,50 +59,27 @@ public class DataRecorderHandler extends HandlerThread implements
     @Override
     @DebugLog
     public void startRecording(String dataFilePath){
-        stampCmdMetadata(dataFilePath);
+        LogUtils.d("startRecording");
+        mCurrentFilePath = dataFilePath;
+        mTimeStamper.stampCmdMetadata(TimeStamper.StampRecorderType.DATA);
         mDataFilePath = dataFilePath;
         //connect the api
         mGoogleApiClient.connect();
-        stampInitMetadata(dataFilePath);
+        mJSONdataRecorder.signStart(mCurrentFilePath);
+        mTimeStamper.stampInitMetadata(TimeStamper.StampRecorderType.DATA);
     }
 
-    private void stampCmdMetadata(String dataFilePath) {
-        // the file we're going to write to
-        dataFilePath.concat(METADATA_SUFFIX);
-        File file = new File(dataFilePath);
-        //write json to file
-        try {
-            String timeStamp = "cmdTime:" + String.valueOf(TimeKeeper.getInstance().getTime()) + "\r\n";
-            FileOutputStream outputStream = new FileOutputStream(file);
-            outputStream.write(timeStamp.getBytes());
-            outputStream.close();
-        } catch (IOException e) {
-            LogUtils.d("stampCmdMetadata failed");
-            e.printStackTrace();
-        }
-    }
-    private void stampInitMetadata(String dataFilePath) {
-        // the file we're going to write to
-        dataFilePath.concat(METADATA_SUFFIX);
-        File file = new File(dataFilePath);
-        //write json to file
-        try {
-            String timeStamp = "initTime:" + String.valueOf(TimeKeeper.getInstance().getTime()) + "\r\n";
-            FileOutputStream outputStream = new FileOutputStream(file);
-            outputStream.write(timeStamp.getBytes());
-            outputStream.close();
-        } catch (IOException e) {
-            LogUtils.d("stampInitMetadata failed");
-            e.printStackTrace();
-        }
-    }
+
 
     @Override
     @DebugLog
     public void stopRecording(){
-        LogUtils.d("stopRecording "+ System.currentTimeMillis());
+        LogUtils.d("stopRecording");
+        mTimeStamper.stampStopMetadata(TimeStamper.StampRecorderType.DATA);
+        LogUtils.d("stopRecording");
         // disconnect the api
         mGoogleApiClient.disconnect();
+        mJSONdataRecorder.signStop(mCurrentFilePath);
     }
 
 
@@ -118,17 +91,13 @@ public class DataRecorderHandler extends HandlerThread implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        LogUtils.d("");
         updateLastLocation();
-
         if (mLastLocation != null) {
             mJSONdataRecorder.recordLocation(mLastLocation,mDataFilePath);
         }
-
         mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(LOCATION_UPDATE_INTERVAL);
-
         try {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         } catch (SecurityException e) {

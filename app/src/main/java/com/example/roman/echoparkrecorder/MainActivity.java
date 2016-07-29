@@ -44,12 +44,8 @@ public class MainActivity extends MyAppCompatActivity implements ServiceStateLis
         if (!clickTimeoutOverCheck()) {
             return;
         }
-
         if (mIsRecording) {
             mBroadcastTransmitter.stopRecording();
-            mButton.setText(R.string.start_recording);
-            mIsRecording = false;
-            Toast.makeText(MainActivity.this, R.string.recording_stopped, Toast.LENGTH_SHORT).show();
             return;
         }
         //if not recording
@@ -58,9 +54,6 @@ public class MainActivity extends MyAppCompatActivity implements ServiceStateLis
             return;
         }
         mBroadcastTransmitter.startRecording();
-        mButton.setText(R.string.stop_recording);
-        mIsRecording = true;
-        Toast.makeText(MainActivity.this, R.string.recording_started, Toast.LENGTH_SHORT).show();
     }
 
     @Override
