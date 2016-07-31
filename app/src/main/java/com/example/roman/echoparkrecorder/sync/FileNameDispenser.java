@@ -20,10 +20,12 @@ public class FileNameDispenser {
     private final String VIDEO_EXTENSION = ".mp4";
 
     //base file names - we'll append the filenameid and extension to them
-    private final String BASE_AUDIO_FILE_NAME = "/audio";
-    private final String BASE_DATA_FILE_NAME = "/data";
-    private final String BASE_VIDEO_FILE_NAME = "/video";
+    private final String BASE_AUDIO_FILE_NAME = "audio";
+    private final String BASE_DATA_FILE_NAME = "data";
+    private final String BASE_VIDEO_FILE_NAME = "`video";
 
+    private final String SEPERATOR_TOKEN = "_";
+    private final String FILE_SEPERATOR_TOKEN = "/";
     // metadata suffix
     private static final String METADATA_SUFFIX = ".metadata";
 
@@ -65,14 +67,14 @@ public class FileNameDispenser {
     }
 
     public String getDataFilePath() {
-        return getStorageDirectory() + BASE_DATA_FILE_NAME +mTimeKeeper.getServerTime()+DATA_EXTENSION;
+        return getStorageDirectory() + FILE_SEPERATOR_TOKEN+mTimeKeeper.getServerTime()+ SEPERATOR_TOKEN +BASE_DATA_FILE_NAME +DATA_EXTENSION;
     }
 
     public String getAudioFilePath() {
-        return getStorageDirectory() + BASE_AUDIO_FILE_NAME +mTimeKeeper.getServerTime()+AUDIO_EXTENSION;
+        return getStorageDirectory() +FILE_SEPERATOR_TOKEN+mTimeKeeper.getServerTime()+ SEPERATOR_TOKEN +BASE_AUDIO_FILE_NAME +AUDIO_EXTENSION;
     }
     public String getVideoFilePath() {
-        return getStorageDirectory() + BASE_VIDEO_FILE_NAME +mTimeKeeper.getServerTime()+VIDEO_EXTENSION;
+        return getStorageDirectory() + FILE_SEPERATOR_TOKEN+ mTimeKeeper.getServerTime()+ SEPERATOR_TOKEN +BASE_VIDEO_FILE_NAME +VIDEO_EXTENSION;
     }
     public String getDataFileMetadataPath(){
         return getDataFilePath() + METADATA_SUFFIX;

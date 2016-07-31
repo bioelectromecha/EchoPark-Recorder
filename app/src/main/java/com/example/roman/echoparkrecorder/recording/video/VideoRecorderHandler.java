@@ -42,8 +42,6 @@ public class VideoRecorderHandler extends HandlerThread implements Recorder {
         mTimeStamper.stampCmdMetadata(TimeStamper.StampRecorderType.VIDEO);
         try {
             mServiceCamera = Camera.open();
-//            Camera.Parameters params = mServiceCamera.getParameters();
-//            mServiceCamera.setParameters(params);
             mServiceCamera.unlock();
             //initialize all the mediarecorder stuff
             initMediaRecorder(videoFilePath);

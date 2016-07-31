@@ -17,7 +17,7 @@ public class JSONDataRecorder {
     // file naming stuff
     GsonBuilder mBuilder;
     Gson mGson;
-    private boolean firstWrite = true;
+    private boolean isFirstWrite = true;
 
     public JSONDataRecorder(){
 
@@ -27,23 +27,23 @@ public class JSONDataRecorder {
     }
 
     public void recordLocation(android.location.Location androidLocation, String dataFilePath){
-        //TODO : location time must be written with timekeepr
         // the file we're going to write to
         File file = new File(dataFilePath);
-
-        //create the location POJO TODO
+        //create the location POJO
         Location location = new Location(androidLocation, TimeKeeper.getInstance().getTime());
 
         //write json to file
         try {
             String s = mGson.toJson(location);
+            LogUtils.d(isFirstWrite);
+            LogUtils.d(s);
             FileOutputStream outputStream =  new FileOutputStream(file,true);
-            if(!firstWrite){
+            if(!isFirstWrite){
                 String seperator = ",";
                 outputStream.write(seperator.getBytes());
             }
             outputStream.write(s.getBytes());
-            firstWrite = false;
+            isFirstWrite = false;
             outputStream.close();
         }catch (IOException e){
             LogUtils.d(" WRITE TO JSON FAILED");
@@ -66,6 +66,7 @@ public class JSONDataRecorder {
 
     public void signStop(String dataFilePath) {
         File file = new File(dataFilePath);
+        isFirstWrite = true;
         try {
             String s = "]";
             FileOutputStream outputStream =  new FileOutputStream(file,true);
